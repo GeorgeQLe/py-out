@@ -1,0 +1,58 @@
+export const traits = {
+    smallFrame: {
+        id: 'smallFrame',
+        name: 'Small Frame',
+        description: '+1 Agility, but carry weight reduced by 30%.',
+        bonus: { agility: 1 },
+        penalty: { carryWeightMult: 0.7 },
+    },
+    bruiser: {
+        id: 'bruiser',
+        name: 'Bruiser',
+        description: '+2 Strength, but -2 AP.',
+        bonus: { strength: 2 },
+        penalty: { bonusAP: -2 },
+    },
+    fastShot: {
+        id: 'fastShot',
+        name: 'Fast Shot',
+        description: '-1 AP to fire, but cannot make aimed shots.',
+        bonus: { rangedAPReduction: 1 },
+        penalty: { noAimedShots: true },
+    },
+    finesse: {
+        id: 'finesse',
+        name: 'Finesse',
+        description: '+10% crit chance, but -30% damage.',
+        bonus: { critChanceBonus: 10 },
+        penalty: { damageMult: 0.7 },
+    },
+    heavyHanded: {
+        id: 'heavyHanded',
+        name: 'Heavy Handed',
+        description: '+4 melee damage, but -30% crit damage.',
+        bonus: { meleeDamageBonus: 4 },
+        penalty: { critDamageMult: 0.7 },
+    },
+    gifted: {
+        id: 'gifted',
+        name: 'Gifted',
+        description: '+1 to all SPECIAL, but -10% to all skills, -5 skill pts/level.',
+        bonus: { allSpecial: 1 },
+        penalty: { skillPenalty: -10, skillPointsPenalty: -5 },
+    },
+    jinxed: {
+        id: 'jinxed',
+        name: 'Jinxed',
+        description: 'Everyone (including you) has more critical failures.',
+        bonus: { enemyCritFailBonus: 10 },
+        penalty: { selfCritFailBonus: 10 },
+    },
+    kamikaze: {
+        id: 'kamikaze',
+        name: 'Kamikaze',
+        description: '+5 sequence/initiative, but no natural AC bonus.',
+        bonus: { initiativeBonus: 5 },
+        penalty: { noACBonus: true },
+    },
+};
