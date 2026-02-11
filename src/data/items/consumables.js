@@ -1,7 +1,7 @@
 export const consumables = {
-    stimpak: {
-        id: 'stimpak',
-        name: 'Stimpak',
+    poke_n_heal: {
+        id: 'poke_n_heal',
+        name: 'Poke-n-Heal',
         type: 'consumable',
         glyph: '!',
         fg: '#44ff44',
@@ -11,9 +11,9 @@ export const consumables = {
         effects: { healHP: 15 },
         description: 'Heals 15 HP.',
     },
-    super_stimpak: {
-        id: 'super_stimpak',
-        name: 'Super Stimpak',
+    super_poke_n_heal: {
+        id: 'super_poke_n_heal',
+        name: 'Super Poke-n-Heal',
         type: 'consumable',
         glyph: '!',
         fg: '#00ff00',
@@ -23,9 +23,9 @@ export const consumables = {
         effects: { healHP: 40 },
         description: 'Heals 40 HP. Has delayed side effects.',
     },
-    rad_away: {
-        id: 'rad_away',
-        name: 'RadAway',
+    glow_b_gone: {
+        id: 'glow_b_gone',
+        name: 'Glow-B-Gone',
         type: 'consumable',
         glyph: '!',
         fg: '#ff8800',
@@ -35,9 +35,9 @@ export const consumables = {
         effects: { healRads: 50 },
         description: 'Removes 50 rads.',
     },
-    mentats: {
-        id: 'mentats',
-        name: 'Mentats',
+    brain_bitz: {
+        id: 'brain_bitz',
+        name: 'Brain Bitz',
         type: 'consumable',
         glyph: '!',
         fg: '#ff66ff',
@@ -45,13 +45,13 @@ export const consumables = {
         stackable: true,
         quantity: 1,
         effects: {
-            buff: { type: 'mentats', duration: 10, strength: 2 },
+            buff: { type: 'brain_bitz', duration: 10, strength: 2 },
         },
         description: '+2 Intelligence and Perception for 10 turns.',
     },
-    buffout: {
-        id: 'buffout',
-        name: 'Buffout',
+    buff_puff: {
+        id: 'buff_puff',
+        name: 'Buff Puff',
         type: 'consumable',
         glyph: '!',
         fg: '#ff4444',
@@ -59,13 +59,13 @@ export const consumables = {
         stackable: true,
         quantity: 1,
         effects: {
-            buff: { type: 'buffout', duration: 10, strength: 2 },
+            buff: { type: 'buff_puff', duration: 10, strength: 2 },
         },
         description: '+2 Strength and Endurance for 10 turns.',
     },
-    nuka_cola: {
-        id: 'nuka_cola',
-        name: 'Nuka Cola',
+    nukka_fizz: {
+        id: 'nukka_fizz',
+        name: 'Nukka Fizz',
         type: 'consumable',
         glyph: '!',
         fg: '#4488ff',

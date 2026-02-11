@@ -8,10 +8,10 @@ export class HitCalculation {
 
     calculate(attacker, target, attackerPos, targetPos, weapon, bodyPart = null) {
         const skill = attacker.skills[weapon.skill] || 50;
-        const perceptionBonus = (attacker.perception - 5) * 4;
+        const perceptionBonus = (attacker.perception + (attacker._bonusPerceptionRange || 0) - 5) * 4;
         const dist = distance(attackerPos.x, attackerPos.y, targetPos.x, targetPos.y);
         const distPenalty = dist * 4;
-        const aimedPenalty = bodyPart ? bodyPart.hitPenalty : 0;
+        const aimedPenalty = bodyPart ? bodyPart.hitPenalty + (attacker._aimedShotBonus ? attacker.perception * 2 : 0) : 0;
         const targetAC = target.ac || 0;
 
         const cover = this.coverResolver.getCoverBetween(

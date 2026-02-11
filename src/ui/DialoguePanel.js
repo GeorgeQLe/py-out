@@ -17,8 +17,9 @@ export class DialoguePanel {
 
     close() {
         this.visible = false;
+        const npcId = this.engine.npcId;
         this.engine.end();
-        this.eventBus.emit('dialogueEnded', {});
+        this.eventBus.emit('dialogueEnded', { npcId });
     }
 
     handleInput(key) {

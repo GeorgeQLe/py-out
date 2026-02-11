@@ -78,6 +78,7 @@ export class TurnManager {
             if (combat) {
                 combat.inCombat = false;
                 combat.overwatching = false;
+                combat.statusEffects = [];
             }
         }
         this.turnOrder = [];

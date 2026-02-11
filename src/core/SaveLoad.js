@@ -1,3 +1,5 @@
+import { TileMap } from '../map/TileMap.js';
+
 export class SaveLoad {
     constructor(game) {
         this.game = game;
@@ -5,10 +7,26 @@ export class SaveLoad {
     }
 
     save(slot = 'auto') {
+        // Serialize map snapshots (other maps' state)
+        const serializedSnapshots = {};
+        for (const [mapId, snapshot] of Object.entries(this.game.mapSnapshots)) {
+            serializedSnapshots[mapId] = {
+                tileMap: {
+                    width: snapshot.tileMap.width,
+                    height: snapshot.tileMap.height,
+                    tiles: Array.from(snapshot.tileMap.tiles),
+                    explored: Array.from(snapshot.tileMap.explored),
+                },
+                entities: snapshot.entities,
+                nextEntityId: snapshot.nextEntityId,
+            };
+        }
+
         const data = {
-            version: 1,
+            version: 2,
             timestamp: Date.now(),
             state: this.game.state,
+            currentMapId: this.game.currentMapId,
             player: this._serializeEntity(this.game.playerId),
             tileMap: {
                 width: this.game.tileMap.width,
@@ -18,6 +36,9 @@ export class SaveLoad {
             },
             entities: this._serializeEntities(),
             nextEntityId: this.game.em.nextId,
+            flags: Object.fromEntries(this.game.flags),
+            quests: this._serializeQuests(),
+            mapSnapshots: serializedSnapshots,
         };
 
         try {
@@ -35,7 +56,18 @@ export class SaveLoad {
             if (!raw) return false;
 
             const data = JSON.parse(raw);
-            if (data.version !== 1) return false;
+
+            // Migration: v1 saves treated as wasteland_outpost
+            if (data.version === 1) {
+                data.version = 2;
+                data.currentMapId = 'wasteland_outpost';
+                data.mapSnapshots = {};
+            }
+
+            if (data.version !== 2) return false;
+
+            // Restore current map id
+            this.game.currentMapId = data.currentMapId || 'wasteland_outpost';
 
             // Restore tilemap
             this.game.tileMap.width = data.tileMap.width;
@@ -60,6 +92,41 @@ export class SaveLoad {
             // Restore player reference
             this.game.playerId = data.player.id;
             this.game.state = data.state;
+
+            // Restore map snapshots
+            this.game.mapSnapshots = {};
+            if (data.mapSnapshots) {
+                for (const [mapId, snap] of Object.entries(data.mapSnapshots)) {
+                    const tm = new TileMap(snap.tileMap.width, snap.tileMap.height);
+                    tm.tiles = snap.tileMap.tiles;
+                    tm.explored = new Uint8Array(snap.tileMap.explored);
+                    this.game.mapSnapshots[mapId] = {
+                        tileMap: tm,
+                        entities: snap.entities,
+                        nextEntityId: snap.nextEntityId,
+                    };
+                }
+            }
+
+            // Restore flags
+            this.game.flags = new Map(Object.entries(data.flags || {}));
+
+            // Restore quest state
+            if (data.quests) {
+                for (const [questId, savedQuest] of Object.entries(data.quests)) {
+                    const quest = this.game.questManager.quests.get(questId);
+                    if (quest) {
+                        quest.state = savedQuest.state;
+                        for (let i = 0; i < savedQuest.objectives.length && i < quest.objectives.length; i++) {
+                            quest.objectives[i].current = savedQuest.objectives[i].current;
+                            quest.objectives[i].completed = savedQuest.objectives[i].completed;
+                        }
+                    }
+                }
+            }
+
+            // Update system references to current tileMap
+            this.game._updateSystemTileMapRefs();
 
             return true;
         } catch (e) {
@@ -93,6 +160,20 @@ export class SaveLoad {
             }
         }
         return slots.sort((a, b) => b.timestamp - a.timestamp);
+    }
+
+    _serializeQuests() {
+        const result = {};
+        for (const [questId, quest] of this.game.questManager.quests) {
+            result[questId] = {
+                state: quest.state,
+                objectives: quest.objectives.map(obj => ({
+                    current: obj.current,
+                    completed: obj.completed,
+                })),
+            };
+        }
+        return result;
     }
 
     _serializeEntity(entityId) {

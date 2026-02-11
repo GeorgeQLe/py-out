@@ -12,14 +12,27 @@ export class DamageCalculation {
 
         // Critical hit check
         let isCrit = false;
-        let critRoll = attacker.critChance || attacker.luck;
-        if (flanking) critRoll *= 1.5;
-        if (bodyPart && bodyPart.critMultiplier > 2) critRoll += 10; // head/eyes bonus
 
-        if (rollPercent() < critRoll) {
+        // Slayer: auto-crit on melee
+        if (attacker._meleeCritAlways && weapon.skill === 'melee') {
             isCrit = true;
             const multiplier = bodyPart ? bodyPart.critMultiplier : 2;
             damage = Math.floor(damage * multiplier);
+        } else {
+            let critRoll = attacker.critChance || attacker.luck;
+            if (flanking) critRoll *= 1.5;
+            if (bodyPart && bodyPart.critMultiplier > 2) critRoll += 10; // head/eyes bonus
+
+            if (rollPercent() < critRoll) {
+                isCrit = true;
+                const multiplier = bodyPart ? bodyPart.critMultiplier : 2;
+                damage = Math.floor(damage * multiplier);
+            }
+        }
+
+        // Better Criticals bonus
+        if (isCrit && attacker._critDamageBonus) {
+            damage = Math.floor(damage * (1 + attacker._critDamageBonus / 100));
         }
 
         // Apply armor: DT reduces flat, DR reduces percentage

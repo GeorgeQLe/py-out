@@ -1,8 +1,9 @@
 export class QuestTriggers {
-    constructor(questManager, eventBus, entityManager) {
+    constructor(questManager, eventBus, entityManager, game) {
         this.qm = questManager;
         this.eventBus = eventBus;
         this.em = entityManager;
+        this.game = game;
         this._bind();
     }
 
@@ -21,6 +22,10 @@ export class QuestTriggers {
 
         this.eventBus.on('dialogueEnded', (data) => {
             this._checkTalkObjectives(data);
+        });
+
+        this.eventBus.on('skillUsed', (data) => {
+            this._checkSkillUseObjectives(data);
         });
     }
 
@@ -52,6 +57,7 @@ export class QuestTriggers {
         for (const quest of this.qm.getActiveQuests()) {
             quest.objectives.forEach((obj, i) => {
                 if (obj.type === 'reachLocation' && !obj.completed) {
+                    if (obj.mapId && this.game.currentMapId !== obj.mapId) return;
                     if (data.x === obj.targetX && data.y === obj.targetY) {
                         this.qm.updateObjective(quest.definition.id, i);
                     }
@@ -65,6 +71,18 @@ export class QuestTriggers {
             quest.objectives.forEach((obj, i) => {
                 if (obj.type === 'talkTo' && !obj.completed) {
                     if (data.npcId === obj.targetNpcId) {
+                        this.qm.updateObjective(quest.definition.id, i);
+                    }
+                }
+            });
+        }
+    }
+
+    _checkSkillUseObjectives(data) {
+        for (const quest of this.qm.getActiveQuests()) {
+            quest.objectives.forEach((obj, i) => {
+                if (obj.type === 'skillUse' && !obj.completed) {
+                    if (obj.skill === data.skill && data.skillLevel >= obj.difficulty) {
                         this.qm.updateObjective(quest.definition.id, i);
                     }
                 }

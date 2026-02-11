@@ -12,6 +12,7 @@ export class CombatLog {
         eventBus.on('entityDamaged', (data) => this._logDamage(data));
         eventBus.on('entityDied', (data) => this._logDeath(data));
         eventBus.on('overwatchFired', (data) => this._logOverwatch(data));
+        eventBus.on('meleeAttack', (data) => this._logMelee(data));
         eventBus.on('combatStarted', () => this.add('-- Combat started! --', Colors.uiHighlight));
         eventBus.on('combatEnded', () => this.add('-- Combat ended --', Colors.uiHighlight));
     }
@@ -43,6 +44,14 @@ export class CombatLog {
 
     _logDeath(data) {
         this.add('Target destroyed!', '#f66');
+    }
+
+    _logMelee(data) {
+        if (data.hit) {
+            this.add(`Melee hit! ${data.damage} damage`);
+        } else {
+            this.add('Melee attack missed!', '#888');
+        }
     }
 
     _logOverwatch(data) {

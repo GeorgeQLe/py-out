@@ -1,7 +1,8 @@
 export class DialogueConditions {
-    constructor(entityManager, questManager) {
+    constructor(entityManager, questManager, game) {
         this.em = entityManager;
         this.questManager = questManager;
+        this.game = game;
     }
 
     check(condition, playerId) {
@@ -43,9 +44,7 @@ export class DialogueConditions {
     }
 
     _getFlag(flag) {
-        // Global game flags stored on a Flags component on a singleton entity
-        // For now, return false
-        return false;
+        return this.game?.flags?.get(flag) ?? false;
     }
 
     getConditionLabel(condition) {

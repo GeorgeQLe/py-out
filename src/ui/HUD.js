@@ -1,4 +1,5 @@
 import { Colors } from '../render/Colors.js';
+import { DerivedStats } from '../rpg/DerivedStats.js';
 
 export class HUD {
     constructor(entityManager, playerId) {
@@ -46,6 +47,10 @@ export class HUD {
             const color = i < stats.ap ? '#6af' : '#333';
             renderer.drawGlyph(50 + i, row, ch, color, '#111111');
         }
+
+        // Level / XP
+        const nextXP = DerivedStats.getXPForLevel(stats.level + 1);
+        renderer.drawText(62, row, `Lv:${stats.level} XP:${stats.xp}/${nextXP}`, Colors.uiDim, '#111111');
 
         // Weapon info
         if (combat && combat.equippedWeapon) {

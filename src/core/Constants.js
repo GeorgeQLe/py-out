@@ -11,7 +11,9 @@ export const GameState = {
     DIALOGUE: 'DIALOGUE',
     INVENTORY: 'INVENTORY',
     LEVEL_UP: 'LEVEL_UP',
+    BARTER: 'BARTER',
     GAME_OVER: 'GAME_OVER',
+    VICTORY: 'VICTORY',
 };
 
 export const TICK_RATE = 1000 / 60;

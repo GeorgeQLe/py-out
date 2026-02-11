@@ -40,7 +40,8 @@ export class CombatSystem {
             return null;
         }
 
-        const apCost = bodyPart ? (weapon.apCostAimed || 5) : (weapon.apCost || 4);
+        const baseAPCost = bodyPart ? (weapon.apCostAimed || 5) : (weapon.apCost || 4);
+        const apCost = Math.max(1, baseAPCost - (attackerStats._rangedAPReduction || 0));
         if (attackerStats.ap < apCost) {
             this.eventBus.emit('combatLog', { text: 'Not enough AP!' });
             return null;
@@ -116,6 +117,104 @@ export class CombatSystem {
         return result;
     }
 
+    attemptBurst(attackerId, targetId) {
+        const attackerStats = this.em.get(attackerId, 'Stats');
+        const targetStats = this.em.get(targetId, 'Stats');
+        const attackerPos = this.em.get(attackerId, 'Position');
+        const targetPos = this.em.get(targetId, 'Position');
+        const combat = this.em.get(attackerId, 'CombatState');
+
+        if (!attackerStats || !targetStats || !attackerPos || !targetPos) return null;
+
+        const weapon = combat.equippedWeapon;
+        if (!weapon) {
+            this.eventBus.emit('combatLog', { text: 'No weapon equipped!' });
+            return null;
+        }
+
+        if (!weapon.burstCount || weapon.burstCount <= 1) {
+            this.eventBus.emit('combatLog', { text: 'Weapon cannot burst fire!' });
+            return null;
+        }
+
+        const apCost = weapon.burstAPCost || 6;
+        if (attackerStats.ap < apCost) {
+            this.eventBus.emit('combatLog', { text: 'Not enough AP for burst!' });
+            return null;
+        }
+
+        // Check range
+        const dist = distance(attackerPos.x, attackerPos.y, targetPos.x, targetPos.y);
+        if (dist > weapon.range) {
+            this.eventBus.emit('combatLog', { text: 'Target out of range!' });
+            return null;
+        }
+
+        // Consume all burst ammo upfront
+        const burstCount = weapon.burstCount;
+        if (weapon.ammoType) {
+            const inv = this.em.get(attackerId, 'Inventory');
+            const ammoItem = inv && inv.items.find(i => i.type === 'ammo' && i.id === weapon.ammoType);
+            if (!ammoItem || ammoItem.quantity < burstCount) {
+                this.eventBus.emit('combatLog', { text: `Need ${burstCount} ammo for burst! Only have ${ammoItem ? ammoItem.quantity : 0}.` });
+                return null;
+            }
+            ammoItem.quantity -= burstCount;
+            if (ammoItem.quantity <= 0) {
+                inv.items.splice(inv.items.indexOf(ammoItem), 1);
+            }
+        }
+
+        attackerStats.ap -= apCost;
+
+        // Calculate base hit chance
+        const hitResult = this.hitCalc.calculate(
+            attackerStats, targetStats, attackerPos, targetPos, weapon
+        );
+        const baseHitChance = hitResult.hitChance;
+
+        // Per-bullet rolls with recoil penalty
+        let hits = 0;
+        let totalDamage = 0;
+        for (let i = 0; i < burstCount; i++) {
+            const recoilPenalty = i * 10; // 0%, -10%, -20%, -30%, -40%
+            const effectiveChance = Math.max(5, baseHitChance - recoilPenalty);
+            const rolled = rollPercent();
+            const hit = rolled <= effectiveChance;
+
+            if (hit) {
+                const damageResult = this.damageCalc.calculate(
+                    attackerStats, targetStats, weapon, null, hitResult.flanking
+                );
+                targetStats.hp -= damageResult.damage;
+                totalDamage += damageResult.damage;
+                hits++;
+
+                this.eventBus.emit('entityDamaged', {
+                    targetId,
+                    damage: damageResult.damage,
+                    isCrit: damageResult.isCrit,
+                });
+            }
+
+            // Early termination if target dies
+            if (targetStats.hp <= 0) {
+                this._handleDeath(targetId);
+                break;
+            }
+        }
+
+        this.eventBus.emit('burstFired', {
+            attackerId,
+            targetId,
+            hits,
+            totalShots: burstCount,
+            totalDamage,
+        });
+
+        return { hits, totalShots: burstCount, totalDamage };
+    }
+
     attemptMelee(attackerId, targetId) {
         const attackerStats = this.em.get(attackerId, 'Stats');
         const targetStats = this.em.get(targetId, 'Stats');
@@ -138,7 +237,7 @@ export class CombatSystem {
             this.eventBus.emit('entityDamaged', { targetId, damage, isCrit: false });
         }
 
-        this.eventBus.emit('meleAttack', { attackerId, targetId, hit, damage });
+        this.eventBus.emit('meleeAttack', { attackerId, targetId, hit, damage });
 
         if (targetStats.hp <= 0) {
             this._handleDeath(targetId);

@@ -52,6 +52,7 @@ export class MapLoader {
             }
         }
 
-        return { tileMap, playerStart: playerStart || { x: 1, y: 1 } };
+        const fallback = mapData.arrivals?.default || { x: 1, y: 1 };
+        return { tileMap, playerStart: playerStart || fallback };
     }
 }

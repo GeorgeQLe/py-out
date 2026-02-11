@@ -70,4 +70,13 @@ export const TileTypes = {
         fgExplored: '#4a3a18',
         providesHalfCover: true,
     },
+    '>': {
+        name: 'exit',
+        glyph: '>',
+        fg: '#ffff00',
+        bg: null,
+        blocksMove: false,
+        blocksSight: false,
+        fgExplored: '#888800',
+    },
 };

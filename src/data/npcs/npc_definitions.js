@@ -7,7 +7,7 @@ export const npcDefinitions = {
         dialogueId: 'merchant',
         faction: 'neutral',
         inventory: [
-            { id: 'stimpak', name: 'Stimpak', type: 'consumable', glyph: '!', fg: '#44ff44', weight: 1, stackable: true, quantity: 3, effects: { healHP: 15 }, price: 50 },
+            { id: 'poke_n_heal', name: 'Poke-n-Heal', type: 'consumable', glyph: '!', fg: '#44ff44', weight: 1, stackable: true, quantity: 3, effects: { healHP: 15 }, price: 50 },
             { id: 'leather_armor', name: 'Leather Armor', type: 'armor', glyph: '[', fg: '#6a4a2a', weight: 8, dt: 4, dr: 25, acBonus: 5, price: 200 },
             { id: '9mm', name: '9mm Rounds', type: 'ammo', glyph: '=', fg: '#aa8833', weight: 0, stackable: true, quantity: 48, price: 20 },
         ],

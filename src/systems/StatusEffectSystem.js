@@ -51,11 +51,11 @@ export class StatusEffectSystem {
                 // Handled by hit calculation (reduced perception)
                 break;
 
-            case 'mentats':
+            case 'brain_bitz':
                 // Buff handled by checking for effect
                 break;
 
-            case 'buffout':
+            case 'buff_puff':
                 // Buff handled by checking for effect
                 break;
         }
